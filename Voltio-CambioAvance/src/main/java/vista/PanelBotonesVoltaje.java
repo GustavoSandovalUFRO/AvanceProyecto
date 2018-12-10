@@ -27,6 +27,7 @@ public class PanelBotonesVoltaje extends JPanel {
         this.ingVoltaje = new JButton("Aceptar");
         this.add(ingVoltaje);
         
+        
         this.elimSelecc = new JButton("Eliminar Seleccion");
         this.add(elimSelecc);
         
