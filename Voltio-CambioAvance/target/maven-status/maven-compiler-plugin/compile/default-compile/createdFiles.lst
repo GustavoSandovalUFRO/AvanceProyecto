@@ -1,0 +1,9 @@
+Vista\PanelImagenInicial.class
+Vista\PanelComboBoxCompatibilidadPlaca.class
+Vista\PanelBotonesInicial.class
+Vista\PanelComboBoxCompatibilidadProcesador.class
+Vista\VentanaCompatibilidad.class
+Vista\PanelComboBoxSeleccionPieza.class
+Vista\VentanaInicial.class
+Main\App.class
+Vista\VentanaVoltaje.class
