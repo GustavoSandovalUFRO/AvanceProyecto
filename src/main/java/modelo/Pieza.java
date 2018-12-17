@@ -5,6 +5,9 @@
  */
 package modelo;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+
 
 public class Pieza {
     
@@ -24,8 +27,8 @@ public class Pieza {
         this.socket = socket;
     }
 
-    public boolean validarCompatibilidad(){
-        return false;
+    public static boolean validarCompatibilidad(Socket socketPlacaMadre, Socket socketProcesador){
+        return socketPlacaMadre == socketProcesador;
     }
     
     public TipoPieza getTipoPieza() {
@@ -40,5 +43,40 @@ public class Pieza {
         return socket;
     }
     
+    public static void calcularVoltaje(ArrayList<Pieza> piezas){
+        
+        double voltajeTotal = 0;
+        double voltajeFuenteDePoder = 0;
+        
+        for (Pieza p : piezas){
+            if (p.getTipoPieza().equals(TipoPieza.FuentePoder)){
+                voltajeFuenteDePoder = p.getVoltaje();
+            } else {
+                voltajeTotal += p.getVoltaje();
+            }
+            
+        }
+        
+        if (voltajeTotal >= voltajeFuenteDePoder*0.9 && voltajeTotal <= voltajeFuenteDePoder) {
+            JOptionPane.showMessageDialog(null,
+            "Se sugiere un cambio de fuente de poder por encontrarse cerca de su límite",
+            "Cambio de Fuente",
+            JOptionPane.WARNING_MESSAGE);
+            
+            
+        } else if (voltajeTotal > voltajeFuenteDePoder) {
+            JOptionPane.showMessageDialog(null,
+            "Se debe cambiar la fuente de poder",
+            "Voltaje Insuficiente",
+            JOptionPane.ERROR_MESSAGE);
+            
+            
+        } else if (voltajeTotal*0.9 < voltajeFuenteDePoder*0.9) {
+            JOptionPane.showMessageDialog(null,
+            "Voltaje correcto para el funcionamiento");
+            
+            
+        }
+    }
     
 }

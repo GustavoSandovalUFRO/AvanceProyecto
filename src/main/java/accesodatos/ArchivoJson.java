@@ -10,9 +10,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 
 public class ArchivoJson {
@@ -49,17 +52,20 @@ public class ArchivoJson {
         return respuesta;
     }
 
-    public static ArrayList<Pieza> recuperarObjetos() {
+    public static ArrayList<Pieza> recuperarObjetos(String nombre) {
         
         Gson gson = new Gson();
         BufferedReader br = null;
         
         try {
-            br = new BufferedReader(new FileReader(RUTA+EXTENSION));
+            br = new BufferedReader(new FileReader(RUTA+nombre+EXTENSION));
         } catch (IOException i) {
             
             System.out.println(i.getMessage());
             
+        } catch (NullPointerException pe) {
+            
+            System.out.println(pe.getMessage());
         }
         
         ArrayList<Pieza> pieza = gson.fromJson(br, new TypeToken<List<Pieza>>(){}.getType());
@@ -68,7 +74,7 @@ public class ArchivoJson {
     }
     
         
-    public static String nombreArchivo() {
+    public static String nombrarArchivo() {
         return (String)JOptionPane.showInputDialog(null, 
                 "Ingrese el nombre de su archivo",
                 "Guardar Lista",
@@ -90,4 +96,44 @@ public class ArchivoJson {
             
         }
     }
+    
+    public static List<String> listarArchivos(){
+        List<String> listaArchivos = new ArrayList<>();
+        try(Stream<Path> rutas = Files.walk(Paths.get(RUTA))) {
+            rutas.forEach(rutaArchivo -> {
+                if (Files.isRegularFile(rutaArchivo)) {
+                    try {
+                        listaArchivos.addAll(leerContenido(rutaArchivo));
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            });
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            
+        }
+        return listaArchivos;
+    }
+    
+    public static List<String> leerContenido(Path rutaArchivos) throws IOException{
+        return Files.readAllLines(rutaArchivos);
+        
+    }
+    
+    public static String buscarObjeto(){
+        
+        Object[] objetos = listarArchivos().toArray();
+        String nombreLista = (String)JOptionPane.showInputDialog(
+                    null,
+                    "Seleccione su lista",
+                    "Cargar Lista",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    objetos,
+                    "Lista");
+        
+        return nombreLista;
+    }
+    
 }

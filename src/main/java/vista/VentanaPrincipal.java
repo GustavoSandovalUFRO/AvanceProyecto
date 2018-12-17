@@ -8,6 +8,8 @@ package vista;
 import accesodatos.ArchivoJson;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import modelo.Pieza;
@@ -54,13 +56,13 @@ public class VentanaPrincipal extends JFrame implements ActionListener{
             } else if (pnlPrncpl.getPnlCntrlSpr().getVoltaje().getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Debe especificar el Voltaje", "Advertencia de Voltaje", JOptionPane.WARNING_MESSAGE);
                 
-            } else if (pnlPrncpl.getPnlCntrlSpr().obtenerPieza().equals("Placa Madre") || pnlPrncpl.getPnlCntrlSpr().obtenerPieza().equals("Procesador")) {
-                if (pnlPrncpl.getPnlCntrlSpr().obtenerSocket().equals("Socket")) {
+            } else if (((pnlPrncpl.getPnlCntrlSpr().obtenerPieza().equals("Placa Madre")) ||
+                    (pnlPrncpl.getPnlCntrlSpr().obtenerPieza().equals("Procesador"))) &&
+                    (pnlPrncpl.getPnlCntrlSpr().obtenerSocket().equals("Socket"))) {
+                
                     JOptionPane.showMessageDialog(null, "Debe especificar el socket", "Advertencia de Socket", JOptionPane.WARNING_MESSAGE);
-                }
                 
             } else {
-                
                 TipoPieza tipo = null;
                 switch (pnlPrncpl.getPnlCntrlSpr().obtenerPieza()) {
                     case "Placa Madre":
@@ -88,7 +90,6 @@ public class VentanaPrincipal extends JFrame implements ActionListener{
                         break;
                 }
                 
-                System.out.println(tipo);
                 
                 Object[] datosPieza;
                 
@@ -163,18 +164,88 @@ public class VentanaPrincipal extends JFrame implements ActionListener{
         } else if (e.getSource() == pnlPrncpl.getPnlIfr().getCalcularVolt()){
             System.out.println("Calcular Voltaje");
             
+            if (this.pnlPrncpl.getPnlCntrlIfr().getPiezas().isEmpty()) {
+                JOptionPane.showMessageDialog(null,
+                "Debe añadir sus componentes para realizar esta acción",
+                "Sin Piezas",
+                JOptionPane.ERROR_MESSAGE);
+                
+            } else {
+                
+                List<TipoPieza> busquedaTipoPieza = new ArrayList<>();
+                this.pnlPrncpl.getPnlCntrlIfr().getPiezas().forEach((p) -> {
+                    busquedaTipoPieza.add(p.getTipoPieza());
+                });
+                
+                if (!busquedaTipoPieza.contains(TipoPieza.PlacaMadre)) {
+                    JOptionPane.showMessageDialog(null,
+                    "En sus componentes debe incluir una placa madre",
+                    "Advertencia de Placa Madre",
+                    JOptionPane.WARNING_MESSAGE);
+                    
+                } else if (!busquedaTipoPieza.contains(TipoPieza.Procesador)){
+                    JOptionPane.showMessageDialog(null,
+                    "En sus componentes debe incluir un procesador",
+                    "Advertencia de Procesador",
+                    JOptionPane.WARNING_MESSAGE);
+                    
+                } else if (!busquedaTipoPieza.contains(TipoPieza.FuentePoder)) {  
+                    JOptionPane.showMessageDialog(null,
+                    "En sus componentes debe incluir una fuente de poder",
+                    "Advertencia de Fuente de Poder",
+                    JOptionPane.WARNING_MESSAGE);
+                    
+                } else {
+                    Socket socketPlacaMadre = null;
+                    Socket socketProcesador = null;
+                    
+                    for (Pieza p : this.pnlPrncpl.getPnlCntrlIfr().getPiezas()){
+                        if (p.getTipoPieza().equals(TipoPieza.PlacaMadre)) {
+                            socketPlacaMadre = p.getSocket();
+                            
+                        } else if (p.getTipoPieza().equals(TipoPieza.Procesador)) {
+                            socketProcesador = p.getSocket();
+                            
+                        }
+                        
+                    }
+                    
+                    if (Pieza.validarCompatibilidad(socketPlacaMadre, socketProcesador)) {
+                        Pieza.calcularVoltaje(pnlPrncpl.getPnlCntrlIfr().getPiezas());
+                        
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                        "Su Placa Madre no es compatible con su Procesador",
+                        "Incompatibilidad Detectada",
+                        JOptionPane.ERROR_MESSAGE);
+                        
+                    }  
+                }
+            }
+            
+            
         } else if (e.getSource() == pnlPrncpl.getPnlIfr().getGuardarLista()){
             System.out.println("Guardar Lista");
             
-            ArchivoJson.almacenarObjetos(pnlPrncpl.getPnlCntrlIfr().getPiezas(), ArchivoJson.nombreArchivo());
+            ArchivoJson.almacenarObjetos(pnlPrncpl.getPnlCntrlIfr().getPiezas(), ArchivoJson.nombrarArchivo());
             
         } else if (e.getSource() == pnlPrncpl.getPnlIfr().getCargarLista()){
             System.out.println("Cargar Lista");
             
+            ArchivoJson.recuperarObjetos(ArchivoJson.buscarObjeto());
+            
+            int filas = this.pnlPrncpl.getPnlCntrlIfr().getModelo().getRowCount();
+            for (int i = filas - 1; i >= 0; i--) {
+                this.pnlPrncpl.getPnlCntrlIfr().getModelo().removeRow(i);
+            }
+            
         } else if (e.getSource() == pnlPrncpl.getPnlIfr().getLimpiarLista()){
             System.out.println("Limpiar Tabla");
             
-            this.pnlPrncpl.getPnlCntrlIfr().getTabla().removeAll();
+            int filas = this.pnlPrncpl.getPnlCntrlIfr().getModelo().getRowCount();
+            for (int i = filas - 1; i >= 0; i--) {
+                this.pnlPrncpl.getPnlCntrlIfr().getModelo().removeRow(i);
+            }
             
         } else if (e.getSource() == pnlPrncpl.getPnlCntrlSpr().getPieza()){
             
